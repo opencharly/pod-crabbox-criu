@@ -1,0 +1,40 @@
+# criu-lease — the CRIU lease delta on top of the published base image.
+#
+# The CRIU contract (the binary, its version probe and the seccomp_suspend
+# pre-flight) is owned by opencharly/layer-criu; this layer pins it, restates the
+# lease SSH port the OCI base cannot carry across the boundary, and probes the
+# inherited contract at THIS image's boundary.
+criu-lease:
+    candy:
+        description: |
+            `criu` in a lease image: composes opencharly/layer-criu at a pinned tag,
+            restates the lease SSH port (2222) that an OCI base does not carry in its
+            candy chain, and probes the inherited lease contract (sshd, the shared
+            bootstrap, the readiness hook, the `crabbox` user and the 2222 drop-in).
+            The layer's `criu check --unprivileged --feature seccomp_suspend` pre-flight
+            stays a `context: [runtime]` probe of the host namespace, not a build fact.
+        candy:
+            - '@github.com/opencharly/layer-criu:v2026.307.1914'
+        port:
+            - 2222
+        plan:
+            # The base is a published OCI artifact, so its contract is probed here at
+            # THIS image's boundary — not re-implemented, and not assumed from the tag.
+            - check: the inherited lease SSH contract is present (sshd, bootstrap, readiness hook)
+              id: criu-lease-binaries
+              exit_status: 0
+              command: >-
+                  test -x /usr/sbin/sshd &&
+                  test -x /usr/local/libexec/crabbox/bootstrap.sh &&
+                  test -x /usr/local/libexec/crabbox/ready
+            - check: the inherited lease login user is crabbox at uid 1000
+              id: criu-lease-user
+              exit_status: 0
+              command: >-
+                  test "$(getent passwd 1000 | cut -d: -f1)" = crabbox
+            - check: the inherited SSH drop-in names port 2222 and sshd parses it
+              id: criu-lease-sshd
+              exit_status: 0
+              command: >-
+                  grep -qx 'Port 2222' /etc/ssh/sshd_config.d/99-crabbox.conf &&
+                  /usr/sbin/sshd -t

@@ -6,7 +6,7 @@ to the base image's repo; this repo owns only the variant delta.
 
 Canonical files:
 
-- `charly.yml` — the image: its pinned base import, user/entrypoint, and candy list.
+- `charly.yml` — the image: its pinned base image, user/entrypoint, and candy list.
 - `candy/<layer>/charly.yml` — the variant's packages, plan steps and `check:` steps.
 - `.github/workflows/image.yml` — the image build; it triggers on
   `tag-on-merge` **completion** (`workflow_run`), never on `push: tags`
@@ -36,7 +36,7 @@ Canonical files:
 ## Build / validate / test
 
 - `charly box validate` at the repo root — the structural check on the image and
-  its candy (including every imported base at its pinned tag).
+  its candy (including the pulled base image at its pinned tag).
 - `charly box generate pod-crabbox-criu` — inspect the emitted Containerfile and the baked
   `ai.opencharly.description` plan.
 - `charly check box pod-crabbox-criu` — the build-scope `check:` steps.
@@ -46,9 +46,9 @@ Canonical files:
 
 ## Modify this repo
 
-- Keep the base pin in step: a base-contract fix lands in the base repo first, then
-  this repo's pin advances (producer-first). Run `charly box reconcile` for a
-  cross-repo pin alignment.
+- Keep the base tag in step: a base-contract fix lands in `opencharly/pod-crabbox` first,
+  then this repo's `base:` tag advances (producer-first). The base is a pinned OCI
+  artifact, not an `import:`; `charly box reconcile` does not apply to it.
 - A package may be added only from a named source (the base candy, an existing
   `layer-*`/`pod-*` repo's Arch section, the provider's docs, or the Arch/AUR
   package index). Record the source in a comment.

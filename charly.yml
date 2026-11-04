@@ -12,9 +12,7 @@ defaults:
     registry: ghcr.io/opencharly
     build:
         - pac
-import:
-    - cachyos: '@github.com/opencharly/distro-cachyos:v2026.300.1129'
-    - crabbox: '@github.com/opencharly/pod-crabbox:v2026.307.1828'
+import: []
 discover:
     - path: candy
       recursive: true
@@ -30,11 +28,16 @@ pod-crabbox-criu:
             binary, its version probe, and the `criu check --unprivileged
             --feature seccomp_suspend` pre-flight (a runtime probe of the host
             kernel and the namespace the daemon runs in, so it is not a build fact).
-        base: crabbox.pod-crabbox
+        base: ghcr.io/opencharly/pod-crabbox:2026.307.1828
+        # An OCI base does not inherit the parent's distro/build values, so the
+        # CachyOS chain is declared here; the base image is itself CachyOS.
+        distro:
+            - cachyos
+            - arch
         # PID 1 is the base image's `sshd -D`, which must run as root; the LOGIN
         # user stays `crabbox` (uid 1000), created by the inherited candy.
         user: root
         uid: 0
         gid: 0
         candy:
-            - '@github.com/opencharly/layer-criu:v2026.307.1914'
+            - criu-lease

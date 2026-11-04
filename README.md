@@ -8,7 +8,7 @@ installed so a lease can checkpoint and restore its own processes.
 
 | Property | Value |
 |---|---|
-| Base | CachyOS via `pod-crabbox:v2026.307.1828` |
+| Base | CachyOS base image `ghcr.io/opencharly/pod-crabbox:2026.307.1828` |
 | Tool | `criu` from `opencharly/layer-criu` |
 | Pre-flight | `criu check --unprivileged --feature seccomp_suspend` (runtime) |
 
@@ -22,7 +22,7 @@ ssh crabbox@<lease> criu --version
 
 ## Layout
 
-- `charly.yml` — the `pod-crabbox-criu` image (base import + entrypoint).
+- `charly.yml` — the `pod-crabbox-criu` image (pinned base image + entrypoint).
 - `candy/` — the variant's own layer: packages, files and `check:` steps.
 - `.github/workflows/tag-on-merge.yml` — CalVer tag + `CHANGELOG/` on merge.
 - `.github/workflows/image.yml` — builds on `pull_request` and publishes at the merge
@@ -32,6 +32,6 @@ ssh crabbox@<lease> criu --version
 ## Related
 
 - [`opencharly/pod-crabbox`](https://github.com/opencharly/pod-crabbox) — the lease
-  base image this family imports.
+  base image this family builds on.
 - [`CONTAINERD-IMAGES.md`](https://github.com/opencharly/opencharly/blob/main/CONTAINERD-IMAGES.md)
   §2 — the lease-image contract.
